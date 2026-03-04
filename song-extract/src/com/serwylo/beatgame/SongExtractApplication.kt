@@ -24,12 +24,13 @@ class SongExtract(private var arg: Array<String>): ApplicationAdapter() {
         val destDir = File(arg[1])
 
         if (!srcDir.exists()) {
-            return usage("Source MP3 directory $srcDir does not exist")
+            return usage("Source audio directory $srcDir does not exist")
         }
 
         srcDir.listFiles()?.forEach {
-            if (it.extension != "mp3") {
-                Gdx.app.log(TAG, "Skipping non-MP3 file $it.")
+            val ext = it.extension.lowercase()
+            if (ext != "mp3" && ext != "flac") {
+                Gdx.app.log(TAG, "Skipping non-audio file $it.")
             } else {
                 processFile(it, destDir)
             }
@@ -39,19 +40,19 @@ class SongExtract(private var arg: Array<String>): ApplicationAdapter() {
 
     }
 
-    private fun processFile(mp3File: File, destDir: File) {
+    private fun processFile(audioFile: File, destDir: File) {
 
-        val outPath = "${destDir.absolutePath}${File.separator}${mp3File.nameWithoutExtension}.json"
+        val outPath = "${destDir.absolutePath}${File.separator}${audioFile.nameWithoutExtension}.json"
         val outFile = Gdx.files.absolute(outPath)
 
         if (outFile.exists()) {
-            Gdx.app.log(TAG, "Skipping ${mp3File.name} as it already has a data file at $outPath.")
+            Gdx.app.log(TAG, "Skipping ${audioFile.name} as it already has a data file at $outPath.")
             return
         }
 
-        Gdx.app.log(TAG, "Processing ${mp3File.name}, writing to ${outPath}.")
+        Gdx.app.log(TAG, "Processing ${audioFile.name}, writing to ${outPath}.")
 
-        val world = loadLevelDataFromDisk(Gdx.files.absolute(mp3File.path))
+        val world = loadLevelDataFromDisk(Gdx.files.absolute(audioFile.path))
         saveLevelDataToDisk(outFile, world)
 
     }
@@ -65,7 +66,7 @@ class SongExtract(private var arg: Array<String>): ApplicationAdapter() {
                 Gdx.app.error(TAG, error)
             }
 
-            Gdx.app.error(TAG, "Usage: song-extract src-mp3-dir/ dest-data-dir/")
+            Gdx.app.error(TAG, "Usage: song-extract src-audio-dir/ dest-data-dir/")
             Gdx.app.exit()
         }
 

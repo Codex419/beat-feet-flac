@@ -2,7 +2,7 @@ package com.serwylo.beatgame.audio
 
 import java.nio.ByteBuffer
 
-data class Mp3Data(
+data class AudioData(
         private val bytes: ByteArray,
         val channels: Int,
         val sampleRate: Int

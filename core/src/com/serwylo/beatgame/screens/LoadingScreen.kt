@@ -127,7 +127,7 @@ class LoadingScreen(
                 is RemoteLevel -> {
                     val levelDataFile = try {
 
-                        if (!level.getMp3File().exists()) {
+                        if (!level.getAudioFile().exists()) {
                             onRenderingThread {
                                 loadingLabel.setText(strings["loading-screen.downloading-song"])
                             }

@@ -1,5 +1,7 @@
 package com.serwylo.beatgame.audio.playground
 
+import com.serwylo.beatgame.audio.createMusic
+
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.Music
@@ -40,8 +42,8 @@ class AudioAnalysisPlaygroundGame : ApplicationAdapter() {
         // val musicFile = Gdx.files.internal("songs/mp3/the_haunted_mansion_the_courtyard.mp3")
         // val musicFile = Gdx.files.internal("songs/mp3/the_haunted_mansion_the_exercise_room.mp3")
         val musicFile = Gdx.files.internal("songs/mp3/health_and_safety_sharply_bent_wire.mp3")
-        music = Gdx.audio.newMusic(musicFile)
-        spectogram = com.serwylo.beatgame.audio.fft.calculateMp3FFTWithValues(musicFile.read())
+        music = createMusic(musicFile)
+        spectogram = com.serwylo.beatgame.audio.fft.calculateAudioFFTWithValues(musicFile.read())
         // spectogram = smoothFFT(rawSpectogram, 21)
         spectogramImage = com.serwylo.beatgame.audio.fft.renderSpectogram(spectogram)
         texture = Texture(spectogramImage.width, spectogramImage.height, Pixmap.Format.RGB888)
@@ -118,7 +120,7 @@ class AudioAnalysisPlaygroundGame : ApplicationAdapter() {
                 .toSet()
                 .forEach { series["$it*"] = analyseSeries(series[it]!!) }
 
-        features = extractFeaturesFromSeries(series["mean-1st"]!!, spectogram.windowSize, spectogram.mp3Data.sampleRate)
+        features = extractFeaturesFromSeries(series["mean-1st"]!!, spectogram.windowSize, spectogram.audioData.sampleRate)
 
         series.onEach {
             seriesVertices[it.key] = renderSeries(it.value, statsWidth)
@@ -134,7 +136,7 @@ class AudioAnalysisPlaygroundGame : ApplicationAdapter() {
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
-        camera.translate(0f, Gdx.graphics.deltaTime * spectogram.mp3Data.sampleRate / spectogram.windowSize, 0f)
+        camera.translate(0f, Gdx.graphics.deltaTime * spectogram.audioData.sampleRate / spectogram.windowSize, 0f)
         camera.update()
 
         batch.projectionMatrix = camera.combined
@@ -146,7 +148,7 @@ class AudioAnalysisPlaygroundGame : ApplicationAdapter() {
         time.color = Color.GREEN
         time.projectionMatrix = camera.combined
         time.begin(ShapeRenderer.ShapeType.Line)
-        val musicYPosition = music.position * spectogram.mp3Data.sampleRate / spectogram.windowSize
+        val musicYPosition = music.position * spectogram.audioData.sampleRate / spectogram.windowSize
         time.line(0f, musicYPosition, Gdx.graphics.width.toFloat(), musicYPosition)
         time.end()
 
@@ -178,7 +180,7 @@ class AudioAnalysisPlaygroundGame : ApplicationAdapter() {
         val blobs = ShapeRenderer(1000)
         blobs.begin(ShapeRenderer.ShapeType.Filled)
 
-        val currentWindowIndex = (spectogram.mp3Data.sampleRate.toFloat() / spectogram.windowSize.toFloat() * music.position).toInt()
+        val currentWindowIndex = (spectogram.audioData.sampleRate.toFloat() / spectogram.windowSize.toFloat() * music.position).toInt()
         val currentWindow = spectogram.windows[currentWindowIndex]
 
         val equalizerWidth = Gdx.graphics.width / 3f

@@ -6,7 +6,7 @@ import com.google.gson.Gson
 import com.serwylo.beatgame.audio.features.Feature
 import com.serwylo.beatgame.audio.features.LevelData
 import com.serwylo.beatgame.audio.fft.FFTWindow
-import com.serwylo.beatgame.audio.fft.calculateMp3FFTWithValues
+import com.serwylo.beatgame.audio.fft.calculateAudioFFTWithValues
 import com.serwylo.beatgame.audio.playground.*
 import com.serwylo.beatgame.levels.CustomWorld
 import com.serwylo.beatgame.levels.Level
@@ -25,7 +25,7 @@ fun loadLevelDataFromMp3(level: Level): LevelData {
     }
 
     Gdx.app.debug(TAG, "No cached version of world, processing MP3 from disk and caching...")
-    val fromDisk = loadLevelDataFromDisk(level.getMp3File())
+    val fromDisk = loadLevelDataFromDisk(level.getAudioFile())
     cacheLevelData(level, fromDisk)
     return fromDisk
 
@@ -36,7 +36,8 @@ fun loadLevelDataFromDisk(musicFile: FileHandle): LevelData {
     Gdx.app.debug(TAG, "Generating world from ${musicFile.path()}...")
 
     Gdx.app.debug(TAG, "Calculating FFT")
-    val spectogram = calculateMp3FFTWithValues(musicFile.read())
+    val isFlac = musicFile.extension().lowercase() == "flac"
+    val spectogram = calculateAudioFFTWithValues(musicFile.read(), isFlac)
     // val spectogram = smoothFFT(rawSpectogram, 13).toResult()
 
     Gdx.app.debug(TAG, "Extracting and smoothing features")
@@ -49,7 +50,7 @@ fun loadLevelDataFromDisk(musicFile: FileHandle): LevelData {
     val features = extractors.map {
         val featureSeries = seriesFromFFTWindows(spectogram.windows, it)
         val smoothFeatureSeries = smoothSeriesMedian(featureSeries, 13)
-        extractFeaturesFromSeries(smoothFeatureSeries, spectogram.windowSize, spectogram.mp3Data.sampleRate)
+        extractFeaturesFromSeries(smoothFeatureSeries, spectogram.windowSize, spectogram.audioData.sampleRate)
     }
 
     Gdx.app.debug(TAG, "Extracting and smoothing height map")
@@ -59,10 +60,10 @@ fun loadLevelDataFromDisk(musicFile: FileHandle): LevelData {
     }
 
     val smoothHeightMapSeries = smoothSeriesMean(heightMapSeries, 15)
-    val heightMap = extractHeightMapFromSeries(smoothHeightMapSeries, spectogram.windowSize, spectogram.mp3Data.sampleRate, 3f)
+    val heightMap = extractHeightMapFromSeries(smoothHeightMapSeries, spectogram.windowSize, spectogram.audioData.sampleRate, 3f)
 
-    Gdx.app.debug(TAG, "Samples: ${spectogram.mp3Data.pcmSamples.size} @ ${spectogram.mp3Data.sampleRate}Hz (duration: ${spectogram.mp3Data.pcmSamples.size / spectogram.mp3Data.sampleRate})")
-    val duration = spectogram.mp3Data.pcmSamples.size / spectogram.mp3Data.sampleRate
+    Gdx.app.debug(TAG, "Samples: ${spectogram.audioData.pcmSamples.size} @ ${spectogram.audioData.sampleRate}Hz (duration: ${spectogram.audioData.pcmSamples.size / spectogram.audioData.sampleRate})")
+    val duration = spectogram.audioData.pcmSamples.size / spectogram.audioData.sampleRate
 
     Gdx.app.debug(TAG, "Finished generating world")
     return LevelData(duration, heightMap, features[0], features[1], features[2])
@@ -74,7 +75,7 @@ private fun loadLevelDataFromCache(level: Level): LevelData? {
 
     val file = level.getLevelDataFile().file()
     if (!file.exists()) {
-        Gdx.app.debug(TAG, "Data file for world ${level.getMp3File().path()} at ${file.absolutePath} doesn't exist. Likely because it is a custom world which has not yet been generated.")
+        Gdx.app.debug(TAG, "Data file for world ${level.getAudioFile().path()} at ${file.absolutePath} doesn't exist. Likely because it is a custom world which has not yet been generated.")
         return null
     }
 
@@ -94,7 +95,7 @@ private fun loadLevelDataFromCache(level: Level): LevelData? {
     } catch (e: Exception) {
         // Be pretty liberal at throwing away cached files here. That gives us the freedom to change
         // the data structure if required without having to worry about if this will work or not.
-        Gdx.app.error(TAG, "Error occurred while reading cache file for world ${level.getMp3File().path()} at ${file.absolutePath}. Will remove file so it can be cached anew.", e)
+        Gdx.app.error(TAG, "Error occurred while reading cache file for world ${level.getAudioFile().path()} at ${file.absolutePath}. Will remove file so it can be cached anew.", e)
         file.delete()
         return null
     }
@@ -126,7 +127,7 @@ private fun cacheLevelData(level: Level, levelData: LevelData) {
 
     val file = level.getLevelDataFile()
 
-    Gdx.app.debug(TAG, "Caching world for ${level.getMp3File().path()} to ${file.file().absolutePath}")
+    Gdx.app.debug(TAG, "Caching world for ${level.getAudioFile().path()} to ${file.file().absolutePath}")
 
     saveLevelDataToDisk(file, levelData)
 

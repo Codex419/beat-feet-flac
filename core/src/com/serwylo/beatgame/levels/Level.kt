@@ -8,7 +8,7 @@ import java.io.File
 
 sealed interface Level {
     fun getId(): String
-    fun getMp3File(): FileHandle
+    fun getAudioFile(): FileHandle
     fun getLevelDataFile(): FileHandle
     fun getLabel(strings: I18NBundle): String
     fun getUnlockRequirements(): UnlockRequirements
@@ -39,7 +39,7 @@ class BuiltInLevel(
 ): Level {
 
     override  fun getId() = mp3Name
-    override fun getMp3File() = Gdx.files.internal("songs").child("mp3").child(mp3Name)
+    override fun getAudioFile() = Gdx.files.internal("songs").child("mp3").child(mp3Name)
 
     override fun getLevelDataFile(): FileHandle {
         val name = File(mp3Name).nameWithoutExtension
@@ -64,9 +64,9 @@ class BuiltInLevel(
 object LegacyCustomLevel: Level {
 
     override fun getId() = "custom.mp3"
-    override fun getMp3File(): FileHandle = Gdx.files.external("BeatFeet${File.separator}custom.mp3")
+    override fun getAudioFile(): FileHandle = Gdx.files.external("BeatFeet${File.separator}custom.mp3")
     override fun getLevelDataFile(): FileHandle {
-        val name = "custom-${getMp3File().lastModified()}"
+        val name = "custom-${getAudioFile().lastModified()}"
         return Gdx.files.local(".cache").child("world").child("$name.json")
     }
     override fun getLabel(strings: I18NBundle): String = strings["levels.custom"]
@@ -110,7 +110,7 @@ class RemoteLevel(private val world: RemoteWorld, private val data: WorldDTO.Lev
     override fun getId() = data.id
     override fun getLabel(strings: I18NBundle) = data.label
     override fun getWorld() = world
-    override fun getMp3File() = getCachedMp3File(this)
+    override fun getAudioFile() = getCachedMp3File(this)
     override fun getLevelDataFile() = getCachedLevelDataFile(this)
 
     suspend fun ensureMp3Downloaded() = downloadAndCacheFile(data.mp3Url, getCachedMp3File(this))
@@ -157,7 +157,7 @@ class CustomWorld(levelsData: List<CustomWorldDTO.CustomLevelDTO>): World {
 class CustomLevel(private val world: CustomWorld, private val id: String, private val label: String, private val mp3File: FileHandle): Level {
     override fun getId() = id
 
-    override fun getMp3File(): FileHandle = mp3File
+    override fun getAudioFile(): FileHandle = mp3File
 
     override fun getLevelDataFile() = customLevelDataFile(this)
 

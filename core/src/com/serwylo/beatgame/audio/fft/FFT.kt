@@ -2,7 +2,7 @@ package com.serwylo.beatgame.audio.fft
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
-import com.serwylo.beatgame.audio.Mp3Data
+import com.serwylo.beatgame.audio.AudioData
 import javazoom.jl.decoder.Bitstream
 import javazoom.jl.decoder.Header
 import javazoom.jl.decoder.MP3Decoder
@@ -11,41 +11,45 @@ import org.apache.commons.math3.transform.DftNormalization
 import org.apache.commons.math3.transform.FastFourierTransformer
 import org.apache.commons.math3.transform.TransformType
 import java.io.ByteArrayOutputStream
+import org.jflac.FLACDecoder
+import org.jflac.PCMProcessor
+import org.jflac.metadata.StreamInfo
+import org.jflac.util.ByteData
 import java.io.InputStream
 import kotlin.math.ln
 import kotlin.math.min
 
-fun calculateMp3FFT(mp3InputStream: InputStream): FFTResult {
+fun calculateAudioFFT(inputStream: InputStream, isFlac: Boolean = false): FFTResult {
 
-    val mp3Data = readPcm(mp3InputStream)
+    val audioData = if (isFlac) readFlacPcm(inputStream) else readPcm(inputStream)
 
     val windowSize = 1024
 
-    val numWindows = mp3Data.pcmSamples.size / windowSize
+    val numWindows = audioData.pcmSamples.size / windowSize
     val windows = ArrayList<FFTWindow>(numWindows)
     for (windowIndex in 0..numWindows) {
-        val frequencyValues = calculateFFTWindow(mp3Data, windowIndex, windowSize)
+        val frequencyValues = calculateFFTWindow(audioData, windowIndex, windowSize)
         windows.add(FFTWindow.create(windowIndex, frequencyValues))
     }
 
-    return FFTResult(mp3Data, windowSize, windows)
+    return FFTResult(audioData, windowSize, windows)
 
 }
 
-fun calculateMp3FFTWithValues(mp3InputStream: InputStream): FFTResultWithValues {
+fun calculateAudioFFTWithValues(inputStream: InputStream, isFlac: Boolean = false): FFTResultWithValues {
 
-    val mp3Data = readPcm(mp3InputStream)
+    val audioData = if (isFlac) readFlacPcm(inputStream) else readPcm(inputStream)
 
     val windowSize = 1024
 
-    val numWindows = mp3Data.pcmSamples.size / windowSize
+    val numWindows = audioData.pcmSamples.size / windowSize
     val windows = ArrayList<FFTWindowWithValues>(numWindows)
     for (windowIndex in 0..numWindows) {
-        val frequencyValues = calculateFFTWindow(mp3Data, windowIndex, windowSize)
+        val frequencyValues = calculateFFTWindow(audioData, windowIndex, windowSize)
         windows.add(FFTWindowWithValues.create(windowIndex, frequencyValues))
     }
 
-    return FFTResultWithValues(mp3Data, windowSize, windows)
+    return FFTResultWithValues(audioData, windowSize, windows)
 
 }
 
@@ -76,7 +80,7 @@ fun smoothFFT(spectogram:FFTResultWithValues, smoothingWindow: Int): FFTResultWi
         smoothSeries.add(window)
     }
 
-    return FFTResultWithValues(spectogram.mp3Data, spectogram.windowSize, smoothSeries)
+    return FFTResultWithValues(spectogram.audioData, spectogram.windowSize, smoothSeries)
 }
 
 fun renderSpectogram(fftResult: FFTResultWithValues): Pixmap {
@@ -154,13 +158,13 @@ private fun getBuffer(size: Int): DoubleArray {
     return newBuffer
 }
 
-private fun calculateFFTWindow(mp3Data: Mp3Data, windowIndex: Int, windowSize: Int): List<FrequencyValue> {
+private fun calculateFFTWindow(audioData: AudioData, windowIndex: Int, windowSize: Int): List<FrequencyValue> {
 
     val startSample = windowIndex * windowSize
-    val endSample = min(mp3Data.pcmSamples.size, startSample + windowSize)
+    val endSample = min(audioData.pcmSamples.size, startSample + windowSize)
 
     val samples = DoubleArray(windowSize)
-    val samplesToCast = mp3Data.pcmSamples.slice(IntRange(startSample, endSample - 1))
+    val samplesToCast = audioData.pcmSamples.slice(IntRange(startSample, endSample - 1))
 
     for (i in samplesToCast.indices) {
         samples[i] = samplesToCast[i].toDouble()
@@ -183,7 +187,7 @@ private fun calculateFFTWindow(mp3Data: Mp3Data, windowIndex: Int, windowSize: I
     val values = ArrayList<FrequencyValue>(size)
     for (i in 0 until size) {
         values.add(FrequencyValue(
-                frequency = i.toDouble() * mp3Data.sampleRate / windowSize,
+                frequency = i.toDouble() * audioData.sampleRate / windowSize,
                 absValue = fftResult[i].abs()
         ))
     }
@@ -195,7 +199,7 @@ private fun calculateFFTWindow(mp3Data: Mp3Data, windowIndex: Int, windowSize: I
 /**
  * Originally from libgdx Mp3.Sound class (Licensed as Apache 2.0)
  */
-private fun readPcm(mp3InputStream: InputStream): Mp3Data {
+private fun readPcm(mp3InputStream: InputStream): AudioData {
 
     val output = ByteArrayOutputStream(4096)
 
@@ -223,9 +227,38 @@ private fun readPcm(mp3InputStream: InputStream): Mp3Data {
             output.write(outputBuffer.buffer, 0, outputBuffer.reset())
         }
         bitstream.close()
-        return Mp3Data(output.toByteArray(), channels, sampleRate)
+        return AudioData(output.toByteArray(), channels, sampleRate)
     } catch (e: java.lang.Exception) {
-        return Mp3Data(ByteArray(0), 0, 0)
+        return AudioData(ByteArray(0), 0, 0)
+    }
+
+}
+
+private fun readFlacPcm(flacInputStream: InputStream): AudioData {
+
+    val output = ByteArrayOutputStream(4096)
+
+    val decoder = FLACDecoder(flacInputStream)
+
+    var sampleRate = 0
+    var channels = 0
+
+    decoder.addPCMProcessor(object : PCMProcessor {
+        override fun processStreamInfo(info: StreamInfo) {
+            channels = info.channels
+            sampleRate = info.sampleRate
+        }
+
+        override fun processPCM(pcm: ByteData) {
+            output.write(pcm.data, 0, pcm.len)
+        }
+    })
+
+    try {
+        decoder.decode()
+        return AudioData(output.toByteArray(), channels, sampleRate)
+    } catch (e: Exception) {
+        return AudioData(ByteArray(0), 0, 0)
     }
 
 }

@@ -1,11 +1,11 @@
 package com.serwylo.beatgame.audio.fft
 
-import com.serwylo.beatgame.audio.Mp3Data
+import com.serwylo.beatgame.audio.AudioData
 
 data class FFTResultWithValues(
-        val mp3Data: Mp3Data,
+        val audioData: AudioData,
         val windowSize: Int,
         val windows: List<FFTWindowWithValues>
 ) {
-    fun toResult() = FFTResult(mp3Data, windowSize, windows.map { it.toWindow() })
+    fun toResult() = FFTResult(audioData, windowSize, windows.map { it.toWindow() })
 }

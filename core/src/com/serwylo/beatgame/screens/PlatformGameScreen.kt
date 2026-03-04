@@ -13,6 +13,7 @@ import com.serwylo.beatgame.Assets
 import com.serwylo.beatgame.BeatFeetGame
 import com.serwylo.beatgame.Globals
 import com.serwylo.beatgame.HUD
+import com.serwylo.beatgame.audio.createMusic
 import com.serwylo.beatgame.audio.features.Feature
 import com.serwylo.beatgame.audio.features.LevelData
 import com.serwylo.beatgame.entities.*
@@ -38,7 +39,7 @@ class PlatformGameScreen(
     private lateinit var hud: HUD
     private val obstacles = mutableListOf<Obstacle>()
 
-    private val music = Gdx.audio.newMusic(level.getMp3File())
+    private val music = createMusic(level.getAudioFile())
 
     /**
      * Used at the end of the game to show feedback about the level and also a few options for

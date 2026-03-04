@@ -12,3 +12,7 @@ dependencies {
     implementation 'com.badlogicgames.jlayer:jlayer:1.0.2-gdx'
     implementation 'com.google.code.gson:gson:2.8.6'
 }
+
+test {
+    jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
+}
