@@ -33,6 +33,7 @@
 -keep class com.badlogic.gdx.controllers.android.AndroidControllers
 
 -dontwarn org.slf4j.impl.StaticLoggerBinder
+-dontwarn javax.sound.sampled.**
 
 # Dynamicall load many of these classes from a skin.json file.
 -keep class com.badlogic.gdx.scenes.scene2d.** {

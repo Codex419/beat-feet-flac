@@ -10,14 +10,18 @@ import javazoom.jl.decoder.OutputBuffer
 import org.apache.commons.math3.transform.DftNormalization
 import org.apache.commons.math3.transform.FastFourierTransformer
 import org.apache.commons.math3.transform.TransformType
+import org.jflac.FLACDecoder
+import org.jflac.PCMProcessor
+import org.jflac.metadata.StreamInfo
+import org.jflac.util.ByteData
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import kotlin.math.ln
 import kotlin.math.min
 
-fun calculateMp3FFT(mp3InputStream: InputStream): FFTResult {
+fun calculateMp3FFT(mp3InputStream: InputStream, isFlac: Boolean = false): FFTResult {
 
-    val mp3Data = readPcm(mp3InputStream)
+    val mp3Data = if (isFlac) readFlacPcm(mp3InputStream) else readPcm(mp3InputStream)
 
     val windowSize = 1024
 
@@ -32,9 +36,9 @@ fun calculateMp3FFT(mp3InputStream: InputStream): FFTResult {
 
 }
 
-fun calculateMp3FFTWithValues(mp3InputStream: InputStream): FFTResultWithValues {
+fun calculateMp3FFTWithValues(mp3InputStream: InputStream, isFlac: Boolean = false): FFTResultWithValues {
 
-    val mp3Data = readPcm(mp3InputStream)
+    val mp3Data = if (isFlac) readFlacPcm(mp3InputStream) else readPcm(mp3InputStream)
 
     val windowSize = 1024
 
@@ -190,6 +194,32 @@ private fun calculateFFTWindow(mp3Data: Mp3Data, windowIndex: Int, windowSize: I
 
     return values
 
+}
+
+private fun readFlacPcm(flacInputStream: InputStream): Mp3Data {
+    val output = ByteArrayOutputStream(4096)
+    var sampleRate = -1
+    var channels = -1
+
+    try {
+        val decoder = FLACDecoder(flacInputStream)
+        decoder.addPCMProcessor(object : PCMProcessor {
+            override fun processStreamInfo(streamInfo: StreamInfo) {
+                sampleRate = streamInfo.sampleRate
+                channels = streamInfo.channels
+            }
+
+            override fun processPCM(pcm: ByteData) {
+                val bytes = pcm.data
+                val len = pcm.len
+                output.write(bytes, 0, len)
+            }
+        })
+        decoder.decode()
+        return Mp3Data(output.toByteArray(), channels, sampleRate)
+    } catch (e: Exception) {
+        return Mp3Data(ByteArray(0), 0, 0)
+    }
 }
 
 /**

@@ -24,12 +24,12 @@ class SongExtract(private var arg: Array<String>): ApplicationAdapter() {
         val destDir = File(arg[1])
 
         if (!srcDir.exists()) {
-            return usage("Source MP3 directory $srcDir does not exist")
+            return usage("Source MP3/FLAC directory $srcDir does not exist")
         }
 
         srcDir.listFiles()?.forEach {
-            if (it.extension != "mp3") {
-                Gdx.app.log(TAG, "Skipping non-MP3 file $it.")
+            if (it.extension != "mp3" && it.extension != "flac") {
+                Gdx.app.log(TAG, "Skipping non-MP3/FLAC file $it.")
             } else {
                 processFile(it, destDir)
             }

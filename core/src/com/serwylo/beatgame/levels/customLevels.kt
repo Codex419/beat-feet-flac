@@ -112,20 +112,21 @@ fun customLevelDataFile(level: CustomLevel): FileHandle {
         .child("${level.getId()}.json")
 }
 
-fun customMp3File(levelId: String): FileHandle {
+fun customMp3File(levelId: String, extension: String = "mp3"): FileHandle {
     return Gdx.files.local("custom-world")
-        .child("${levelId}.mp3")
+        .child("${levelId}.${extension}")
 }
 
 fun customLevelId(mp3Title: String) = sanitiseFilename(mp3Title)
 
 fun copyExternalMp3ToGameFolder(sourceMp3: FileHandle): CustomWorldDTO.CustomLevelDTO {
-    val title = readMp3Title(sourceMp3)
+    val isFlac = sourceMp3.extension().equals("flac", ignoreCase = true)
+    val title = if (isFlac) sourceMp3.nameWithoutExtension() else readMp3Title(sourceMp3)
 
     Gdx.app.log(TAG, "Adding new custom level. Song title: \"$title\".")
 
     val levelId = customLevelId(title)
-    val destMp3File = customMp3File(levelId)
+    val destMp3File = customMp3File(levelId, if (isFlac) "flac" else "mp3")
 
     Gdx.app.log(TAG, "Copying ${sourceMp3.path()} to ${destMp3File.path()}")
     sourceMp3.file().copyTo(destMp3File.file())
@@ -171,8 +172,8 @@ fun onAddNewLevel(game: BeatFeetGame, onAdded: (world: CustomWorld) -> Unit) {
 
     // Filter out all files which do not have the .ogg extension and are not of an audio MIME type - belt and braces
     conf.mimeFilter = "audio/*"
-    conf.nameFilter = FilenameFilter { dir, name -> name.endsWith("mp3") }
-    conf.title = "Choose MP3 file";
+    conf.nameFilter = FilenameFilter { dir, name -> name.endsWith("mp3") || name.endsWith("flac") }
+    conf.title = "Choose MP3 or FLAC file";
 
 
     game.platformListener.fileChooser().chooseFile(conf, object : NativeFileChooserCallback {

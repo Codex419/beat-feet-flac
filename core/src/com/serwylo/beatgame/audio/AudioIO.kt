@@ -36,7 +36,8 @@ fun loadLevelDataFromDisk(musicFile: FileHandle): LevelData {
     Gdx.app.debug(TAG, "Generating world from ${musicFile.path()}...")
 
     Gdx.app.debug(TAG, "Calculating FFT")
-    val spectogram = calculateMp3FFTWithValues(musicFile.read())
+    val isFlac = musicFile.extension().equals("flac", ignoreCase = true)
+    val spectogram = calculateMp3FFTWithValues(musicFile.read(), isFlac)
     // val spectogram = smoothFFT(rawSpectogram, 13).toResult()
 
     Gdx.app.debug(TAG, "Extracting and smoothing features")

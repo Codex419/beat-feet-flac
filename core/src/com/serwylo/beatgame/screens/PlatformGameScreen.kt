@@ -15,6 +15,7 @@ import com.serwylo.beatgame.Globals
 import com.serwylo.beatgame.HUD
 import com.serwylo.beatgame.audio.features.Feature
 import com.serwylo.beatgame.audio.features.LevelData
+import com.serwylo.beatgame.audio.flac.FlacMusic
 import com.serwylo.beatgame.entities.*
 import com.serwylo.beatgame.graphics.TiledSprite
 import com.serwylo.beatgame.graphics.calcDensityScaleFactor
@@ -38,7 +39,11 @@ class PlatformGameScreen(
     private lateinit var hud: HUD
     private val obstacles = mutableListOf<Obstacle>()
 
-    private val music = Gdx.audio.newMusic(level.getMp3File())
+    private val music = if (level.getMp3File().extension().equals("flac", ignoreCase = true)) {
+        FlacMusic(level.getMp3File())
+    } else {
+        Gdx.audio.newMusic(level.getMp3File())
+    }
 
     /**
      * Used at the end of the game to show feedback about the level and also a few options for
