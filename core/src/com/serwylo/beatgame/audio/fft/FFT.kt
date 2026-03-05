@@ -72,8 +72,6 @@ fun smoothFFT(spectogram:FFTResultWithValues, smoothingWindow: Int): FFTResultWi
                 FrequencyValue(value.frequency, value.absValue + window.values[i].absValue)
             }
 
-            val avgValues = newValues.map { FrequencyValue(it.frequency, it.absValue / (end - start)) }
-
             FFTWindowWithValues.create(i, newValues)
         }
 

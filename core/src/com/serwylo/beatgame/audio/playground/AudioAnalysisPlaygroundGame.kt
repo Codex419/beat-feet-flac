@@ -75,10 +75,10 @@ class AudioAnalysisPlaygroundGame : ApplicationAdapter() {
 
         // When it is loud, is it high or low pitched? Loud drums seem to go down, whereas lout
         // other instruments go higher (as does voice)
-        val domFreq = { it: FFTWindow ->
-            val freq = it.dominantFrequency
-            if (freq.toInt() == 0) 0.0 else ln(freq)
-        }
+        // val domFreq = { it: FFTWindow ->
+        //     val freq = it.dominantFrequency
+        //     if (freq.toInt() == 0) 0.0 else ln(freq)
+        // }
 
         //series["domFreq"] = seriesFromFFTWindows(spectogram.windows, domFreq)
         //series["domFreqU3"] = smoothSeriesMean(series["domFreq"]!!, 3)
@@ -188,7 +188,6 @@ class AudioAnalysisPlaygroundGame : ApplicationAdapter() {
         val equalizerY = Gdx.graphics.height - equalizerHeight
         val barWidth = equalizerWidth / spectogram.windowSize * 2
         currentWindow.values.forEachIndexed { i, f ->
-            val value = if (i == 0) { f.logAbsValue } else { (currentWindow.values[i - 1].logAbsValue + f.logAbsValue) / 2f }
             blobs.color = Color(i * 2 / spectogram.windowSize.toFloat(), 1f, 1f, 1f)
             blobs.rect(equalizerX + (i * barWidth), equalizerY, barWidth.toInt().toFloat(), f.logAbsValue.toFloat() * equalizerHeight / 30)
         }

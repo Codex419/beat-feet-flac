@@ -400,7 +400,7 @@ class Assets(private val locale: Locale) {
         )
 
         private fun fontForLocale(locale: Locale): Font? {
-            val country = locale.language.toLowerCase(Locale.ENGLISH)
+            val country = locale.language.lowercase(Locale.ENGLISH)
             return supportedLocales[country]
         }
 

@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
 class DeleteLevelScreen(private val game: BeatFeetGame, private val level: CustomLevel): ScreenAdapter() {
 
     private val stage = makeStage()
-    private lateinit var btnConfirm: Cell<Button>
-    private lateinit var btnCancel: Cell<Button>
+    private var btnConfirm: Cell<Button>
+    private var btnCancel: Cell<Button>
 
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.IO + job)

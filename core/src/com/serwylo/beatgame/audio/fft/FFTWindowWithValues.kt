@@ -20,8 +20,7 @@ class FFTWindowWithValues(
         rmse: Double,
         meanFirstQuarter: Double,
         meanSecondQuarter: Double,
-        meanThirdQuarter: Double,
-        meanFourthQuarter: Double
+        meanThirdQuarter: Double
 ): FFTWindow(windowIndex, energy, mean, stdDev, min, max, q1, median, q3, kurtosis, skewness, dominantFrequency, rmse, meanFirstQuarter, meanSecondQuarter, meanThirdQuarter) {
 
     fun toWindow() = FFTWindow(windowIndex, energy, mean, stdDev, min, max, q1, median, q3, kurtosis, skewness, dominantFrequency, rmse, meanFirst, meanSecond, meanThird)
@@ -59,10 +58,9 @@ class FFTWindowWithValues(
                     // https://maelfabien.github.io/machinelearning/Speech9/#3-root-mean-square-energy
                     rmse = sqrt(values.map { it.absValue * it.absValue }.sum() / values.size),
 
-                    meanFirstQuarter = values.slice(IntRange(0, quarterSize)).sumByDouble { it.absValue } / quarterSize,
-                    meanSecondQuarter = values.slice(IntRange(quarterSize, quarterSize * 2)).sumByDouble { it.absValue } / quarterSize,
-                    meanThirdQuarter = values.slice(IntRange(quarterSize * 2, quarterSize * 3)).sumByDouble { it.absValue } / quarterSize,
-                    meanFourthQuarter = values.slice(IntRange(quarterSize * 3, values.size - 1)).sumByDouble { it.absValue } / quarterSize
+                    meanFirstQuarter = values.slice(IntRange(0, quarterSize)).sumOf { it.absValue } / quarterSize,
+                    meanSecondQuarter = values.slice(IntRange(quarterSize, quarterSize * 2)).sumOf { it.absValue } / quarterSize,
+                    meanThirdQuarter = values.slice(IntRange(quarterSize * 2, quarterSize * 3)).sumOf { it.absValue } / quarterSize
             )
 
         }

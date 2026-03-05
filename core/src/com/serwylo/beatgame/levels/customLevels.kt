@@ -172,7 +172,7 @@ fun onAddNewLevel(game: BeatFeetGame, onAdded: (world: CustomWorld) -> Unit) {
 
     // Filter out all files which do not have the .ogg extension and are not of an audio MIME type - belt and braces
     conf.mimeFilter = "audio/*"
-    conf.nameFilter = FilenameFilter { dir, name -> name.endsWith("mp3") || name.endsWith("flac") }
+    conf.nameFilter = FilenameFilter { _, name -> name.endsWith("mp3") || name.endsWith("flac") }
     conf.title = "Choose MP3 or FLAC file";
 
 

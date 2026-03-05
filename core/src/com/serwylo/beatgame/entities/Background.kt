@@ -45,7 +45,7 @@ Background(private val sprites: Assets.Sprites, private val maxSpeed: Float) : E
         skyline.draw(batch)
 
         if (clouds.size == 0) {
-            clouds.addAll((0..(Math.random() * MAX_CLOUDS).toInt()).mapIndexed { it, i ->
+            clouds.addAll((0..(Math.random() * MAX_CLOUDS).toInt()).mapIndexed { _, i ->
                 val cloud = Cloud(sprites, maxSpeed)
                 cloud.init(if (i < 10) cameraViewport else nextViewport)
                 cloud

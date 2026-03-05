@@ -54,9 +54,9 @@ open class FFTWindow(
                     // https://maelfabien.github.io/machinelearning/Speech9/#3-root-mean-square-energy
                     rmse = sqrt(values.map { it.absValue * it.absValue }.sum() / values.size),
 
-                    meanFirst = values.slice(IntRange(0, thirdSize)).sumByDouble { it.absValue } / thirdSize,
-                    meanSecond = values.slice(IntRange(thirdSize, thirdSize * 2)).sumByDouble { it.absValue } / thirdSize,
-                    meanThird = values.slice(IntRange(thirdSize * 2, thirdSize * 3)).sumByDouble { it.absValue } / thirdSize
+                    meanFirst = values.slice(IntRange(0, thirdSize)).sumOf { it.absValue } / thirdSize,
+                    meanSecond = values.slice(IntRange(thirdSize, thirdSize * 2)).sumOf { it.absValue } / thirdSize,
+                    meanThird = values.slice(IntRange(thirdSize * 2, thirdSize * 3)).sumOf { it.absValue } / thirdSize
             )
 
         }
