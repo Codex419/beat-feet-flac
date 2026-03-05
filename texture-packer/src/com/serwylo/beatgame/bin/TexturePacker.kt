@@ -18,7 +18,7 @@ import java.nio.file.Files
 import java.util.*
 
 
-fun main(arg: Array<String>) {
+fun main() {
     packTextures()
     generateFonts()
 }

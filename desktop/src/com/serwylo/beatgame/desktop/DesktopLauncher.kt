@@ -15,9 +15,9 @@ fun main(arg: Array<String>) {
     val locale = if (lang == null) null else {
         val parts = lang.split(Regex("[-_]"))
         if (parts.size > 1) {
-            Locale(parts[0], parts[1])
+            Locale.Builder().setLanguage(parts[0]).setRegion(parts[1]).build()
         } else {
-            Locale(parts[0])
+            Locale.Builder().setLanguage(parts[0]).build()
         }
     }
 

@@ -24,11 +24,11 @@ allprojects {
         gdxVersion = '1.13.0'
         roboVMVersion = '2.3.11'
         box2DLightsVersion = '1.5'
-        ashleyVersion = '1.7.3'
+        ashleyVersion = '1.7.4'
         aiVersion = '1.8.2'
-        ktorVersion = '1.6.0'
-        coroutinesVersion = '1.6.4'
-        ktxVersion = '1.10.0-rc1'
+        ktorVersion = '1.6.8'
+        coroutinesVersion = '1.8.0'
+        ktxVersion = '1.12.1-rc1'
     }
 
     repositories {
