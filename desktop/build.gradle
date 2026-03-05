@@ -1,12 +1,12 @@
-sourceCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_17
 sourceSets.main.java.srcDirs = [ "src/" ]
 sourceSets.main.resources.srcDirs = ["../android/assets"]
 
-project.ext.mainClassName = "com.serwylo.beatgame.desktop.DesktopLauncher"
+project.ext.mainClassName = "com.serwylo.beatgame.desktop.DesktopLauncherKt"
 project.ext.assetsDir = new File("testRes/")
 
 task run(dependsOn: classes, type: JavaExec) {
-    main = project.mainClassName
+    mainClass = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
     workingDir = project.assetsDir
@@ -14,7 +14,7 @@ task run(dependsOn: classes, type: JavaExec) {
 }
 
 task debug(dependsOn: classes, type: JavaExec) {
-    main = project.mainClassName
+    mainClass = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
     workingDir = project.assetsDir
