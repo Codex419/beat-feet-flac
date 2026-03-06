@@ -1,6 +1,0 @@
-🦘 Saltos duplos mais generosos.
-
- * Permitir o segundo salto mais tempo após o primeiro salto.
- * Mostrar uma imagem diferente para o segundo salto para fazer lembrar-lhe que utilizou o segundo salto.
-
-Obrigado àqueles que deram feedback sobre este respeito pelo GitHub.
