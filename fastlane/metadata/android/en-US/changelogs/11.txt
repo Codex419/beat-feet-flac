@@ -1,5 +1,0 @@
-Fixed critical crash when Android system settings are set to a language unsupported by Beat Feet (thanks to lionkmp for reporting and helping to investigate).
-
-Updated translations.
-
-Support via GitHub Sponsors or Liberapay.
